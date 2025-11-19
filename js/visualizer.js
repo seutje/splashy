@@ -50,8 +50,8 @@ export class FluidVisualizer {
             this.splatStack.push({
                 x: e.offsetX / this.canvas.width,
                 y: 1.0 - e.offsetY / this.canvas.height,
-                dx: (Math.random() - 0.5) * 2000,
-                dy: (Math.random() - 0.5) * 2000,
+                dx: (Math.random() - 0.5) * 200,
+                dy: (Math.random() - 0.5) * 200,
                 color: { r: Math.random(), g: Math.random(), b: Math.random() }
             });
         });
@@ -417,13 +417,13 @@ export class FluidVisualizer {
             const baseColor = this.hexToRgb(colorHex);
 
             // Modulate intensity based on bass level
-            const intensity = bassLevel * 10.0;
+            const intensity = bassLevel * 0.5;
 
             this.splatStack.push({
                 x: x,
                 y: y,
-                dx: (Math.random() - 0.5) * 1000 * bassLevel, // Explosive velocity
-                dy: (Math.random() - 0.5) * 1000 * bassLevel,
+                dx: (Math.random() - 0.5) * 200 * bassLevel, // Explosive velocity
+                dy: (Math.random() - 0.5) * 200 * bassLevel,
                 color: {
                     r: baseColor.r * intensity,
                     g: baseColor.g * intensity,
