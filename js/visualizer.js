@@ -37,12 +37,17 @@ export class FluidVisualizer {
 
         // Interaction for testing/fun
         this.canvas.addEventListener('mousemove', (e) => {
+            const speed = Math.hypot(e.movementX, e.movementY);
+            // Map speed to radius multiplier (min 0.00002, max 1.0 at speed 80)
+            const radiusMultiplier = Math.min(Math.max(speed / 80, 0.00002), 1.0);
+
             this.pointers.push({
                 x: e.offsetX / this.canvas.width,
                 y: 1.0 - e.offsetY / this.canvas.height,
                 dx: e.movementX * 5.0,
                 dy: -e.movementY * 5.0,
-                color: { r: 1.0, g: 1.0, b: 1.0 }
+                color: { r: 1.0, g: 1.0, b: 1.0 },
+                radiusMultiplier: radiusMultiplier
             });
         });
 
@@ -382,8 +387,10 @@ export class FluidVisualizer {
         const dt = 0.016; // Fixed time step approx
 
         // 0. Process Mouse Pointers
+        // 0. Process Mouse Pointers
         this.pointers.forEach(p => {
-            this.applySplat(p.x, p.y, p.dx, p.dy, p.color);
+            const radius = (p.radiusMultiplier || 1.0) * this.config.SPLAT_RADIUS;
+            this.applySplat(p.x, p.y, p.dx, p.dy, p.color, radius);
         });
         this.pointers = [];
 
@@ -519,13 +526,14 @@ export class FluidVisualizer {
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
 
-    applySplat(x, y, dx, dy, color) {
+    applySplat(x, y, dx, dy, color, radius) {
+        const r = radius || this.config.SPLAT_RADIUS;
         this.programs.splat.bind();
         this.gl.uniform1i(this.programs.splat.uniforms.uTarget, this.velocity.read.attach(0));
         this.gl.uniform1f(this.programs.splat.uniforms.aspectRatio, this.canvas.width / this.canvas.height);
         this.gl.uniform2f(this.programs.splat.uniforms.point, x, y);
         this.gl.uniform3f(this.programs.splat.uniforms.color, dx, dy, 0.0);
-        this.gl.uniform1f(this.programs.splat.uniforms.radius, this.config.SPLAT_RADIUS);
+        this.gl.uniform1f(this.programs.splat.uniforms.radius, r);
         this.blit(this.velocity.write);
         this.velocity.swap();
 
@@ -534,7 +542,7 @@ export class FluidVisualizer {
         this.gl.uniform1f(this.programs.splat.uniforms.aspectRatio, this.canvas.width / this.canvas.height);
         this.gl.uniform2f(this.programs.splat.uniforms.point, x, y);
         this.gl.uniform3f(this.programs.splat.uniforms.color, color.r, color.g, color.b);
-        this.gl.uniform1f(this.programs.splat.uniforms.radius, this.config.SPLAT_RADIUS);
+        this.gl.uniform1f(this.programs.splat.uniforms.radius, r);
         this.blit(this.density.write);
         this.density.swap();
     }
