@@ -10,7 +10,7 @@ export class FluidVisualizer {
         }
 
         this.config = {
-            SIM_RESOLUTION: 512,
+            SIM_RESOLUTION: 4096,
             DENSITY_DISSIPATION: 0.98,
             VELOCITY_DISSIPATION: 0.99,
             PRESSURE_DISSIPATION: 0.8,
