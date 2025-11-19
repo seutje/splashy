@@ -1,0 +1,275 @@
+:root {
+    --bg-color: #050505;
+    --text-color: #ffffff;
+    --accent-color: #00ffcc;
+    --secondary-color: #ff00aa;
+    --glass-bg: rgba(20, 20, 20, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --font-main: 'Outfit', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-main);
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+}
+
+#visualizer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none; /* Let clicks pass through to canvas if needed, but children will re-enable */
+    transition: opacity 0.5s ease;
+}
+
+#ui-layer.inactive {
+    opacity: 0;
+    cursor: none;
+}
+
+/* Controls Container */
+#controls-container {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    pointer-events: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+#track-info {
+    text-align: center;
+    width: 100%;
+}
+
+#track-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#track-artist {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Progress Bar */
+#progress-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.8rem;
+    font-family: monospace;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+#progress-bar-wrapper {
+    flex-grow: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+#progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+    border-radius: 3px;
+    transition: width 0.1s linear;
+}
+
+/* Buttons */
+#main-controls {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.control-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.control-btn:hover {
+    color: var(--text-color);
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+}
+
+.control-btn.active {
+    color: var(--accent-color);
+}
+
+.main-play-btn {
+    background: var(--text-color);
+    color: var(--bg-color);
+    width: 56px;
+    height: 56px;
+}
+
+.main-play-btn:hover {
+    background: var(--accent-color);
+    color: var(--bg-color);
+    transform: scale(1.1);
+}
+
+/* Playlist Drawer */
+#playlist-drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 320px;
+    height: 100%;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(20px);
+    border-left: 1px solid var(--glass-border);
+    padding: 24px;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+}
+
+#playlist-drawer.hidden {
+    transform: translateX(100%);
+}
+
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+#close-drawer-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.playlist-controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.custom-file-upload {
+    flex-grow: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.custom-file-upload:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#file-upload {
+    display: none;
+}
+
+#clear-playlist-btn {
+    background: none;
+    border: 1px solid rgba(255, 60, 60, 0.5);
+    color: #ff6b6b;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+#playlist-items {
+    list-style: none;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.playlist-item {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.playlist-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.playlist-item.active {
+    background: rgba(0, 255, 204, 0.1);
+    border-left: 3px solid var(--accent-color);
+}
+
+.playlist-item-title {
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+}
+
+.hidden {
+    display: none !important;
+}
