@@ -1,3 +1,5 @@
+import { PRESETS } from './presets.js';
+
 export class UI {
     constructor(audioController, visualizer) {
         this.audioController = audioController;
@@ -27,10 +29,26 @@ export class UI {
         this.closeDrawerBtn = document.getElementById('close-drawer-btn');
         this.clearPlaylistBtn = document.getElementById('clear-playlist-btn');
 
+        // Settings
+        this.settingsBtn = document.getElementById('settings-btn');
+        this.settingsPanel = document.getElementById('settings-panel');
+        this.closeSettingsBtn = document.getElementById('close-settings');
+        this.presetContainer = document.getElementById('preset-buttons');
+
+        this.sliders = {
+            DENSITY_DISSIPATION: document.getElementById('density-dissipation'),
+            VELOCITY_DISSIPATION: document.getElementById('velocity-dissipation'),
+            PRESSURE_DISSIPATION: document.getElementById('pressure-dissipation'),
+            CURL: document.getElementById('curl'),
+            SPLAT_RADIUS: document.getElementById('splat-radius'),
+            SPLAT_FORCE: document.getElementById('splat-force')
+        };
+
         this.inactivityTimer = null;
 
         this.initEventListeners();
         this.setupAudioListeners();
+        this.initSettings();
         this.resetInactivityTimer();
     }
 
@@ -49,6 +67,23 @@ export class UI {
 
         this.uploadBtn.addEventListener('click', () => {
             this.fileUpload.click();
+        });
+
+        // Settings Toggle
+        this.settingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.settingsPanel.classList.remove('hidden');
+        });
+
+        this.closeSettingsBtn.addEventListener('click', () => {
+            this.settingsPanel.classList.add('hidden');
+        });
+
+        // Close settings when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!this.settingsPanel.contains(e.target) && e.target !== this.settingsBtn && !this.settingsBtn.contains(e.target)) {
+                this.settingsPanel.classList.add('hidden');
+            }
         });
 
         // Controls
@@ -89,6 +124,40 @@ export class UI {
             const rect = this.progressBarWrapper.getBoundingClientRect();
             const percent = (e.clientX - rect.left) / rect.width;
             this.audioController.seek(percent);
+        });
+    }
+
+    initSettings() {
+        // Generate Preset Buttons
+        Object.keys(PRESETS).forEach(name => {
+            const btn = document.createElement('button');
+            btn.className = 'preset-btn';
+            btn.textContent = name;
+            btn.addEventListener('click', () => this.applyPreset(name));
+            this.presetContainer.appendChild(btn);
+        });
+
+        // Slider Listeners
+        Object.entries(this.sliders).forEach(([key, slider]) => {
+            slider.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                this.visualizer.updateConfig({ [key]: value });
+            });
+        });
+    }
+
+    applyPreset(name) {
+        const preset = PRESETS[name];
+        if (!preset) return;
+
+        // Update Visualizer
+        this.visualizer.updateConfig(preset);
+
+        // Update Sliders
+        Object.entries(preset).forEach(([key, value]) => {
+            if (this.sliders[key]) {
+                this.sliders[key].value = value;
+            }
         });
     }
 

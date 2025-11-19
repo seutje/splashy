@@ -17,7 +17,8 @@ export class FluidVisualizer {
             PRESSURE_ITERATIONS: 20,
             CURL: 30,
             SPLAT_RADIUS: 0.005,
-            SPLAT_FORCE: 6000
+            SPLAT_FORCE: 6000,
+            COLORS: ['#FFD700', '#8B0000', '#006400'] // Default to King Tubby colors
         };
 
         this.pointers = [];
@@ -411,17 +412,23 @@ export class FluidVisualizer {
             const x = 0.5 + Math.cos(angle) * radius;
             const y = 0.5 + Math.sin(angle) * radius;
 
-            // Color based on intensity
-            const r = bassLevel;
-            const g = midLevel * 2.0; // Boost green for mids
-            const b = 1.0 - bassLevel; // Blue when quiet, red when loud
+            // Pick a random color from the palette
+            const colorHex = this.config.COLORS[Math.floor(Math.random() * this.config.COLORS.length)];
+            const baseColor = this.hexToRgb(colorHex);
+
+            // Modulate intensity based on bass level
+            const intensity = bassLevel * 10.0;
 
             this.splatStack.push({
                 x: x,
                 y: y,
                 dx: (Math.random() - 0.5) * 1000 * bassLevel, // Explosive velocity
                 dy: (Math.random() - 0.5) * 1000 * bassLevel,
-                color: { r: r * 10, g: g * 10, b: b * 10 } // High intensity for HDR look
+                color: {
+                    r: baseColor.r * intensity,
+                    g: baseColor.g * intensity,
+                    b: baseColor.b * intensity
+                }
             });
         }
 
@@ -536,6 +543,19 @@ export class FluidVisualizer {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, target.fbo);
         this.gl.viewport(0, 0, target.width, target.height);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16) / 255,
+            g: parseInt(result[2], 16) / 255,
+            b: parseInt(result[3], 16) / 255
+        } : { r: 1, g: 1, b: 1 };
+    }
+
+    updateConfig(config) {
+        this.config = { ...this.config, ...config };
     }
 }
 
